@@ -2,14 +2,16 @@ const { request, response } = require('express') //express
 const jwt = require('jsonwebtoken')              //jwt token
 const users = require('../Models/userModel')  //model for mongoose to mongoDB
 exports.register= async (request,response)=>{
-const{email,password}=request.body //
-try { const existingUser =await users.findOne({email})
+const{email,username,password}=request.body //
+try { const existingUser =await users.findOne({email,username}) // checking request body  and model
+
  if(existingUser){
     response.status(406).json("User already exist , please login !!!")
  }else{
     const newUser = new users({
-        email,password
+        email,username,password
     })
+    
    await  newUser.save()
     response.status(200).json(newUser)
  }}
@@ -23,8 +25,8 @@ try{ const {email,password}=request.body
     if(existingUser){ // success
         //token
        const token =  jwt.sign(
-        {userId:existingUser._id},process.env.jwt_secret)
-       console.log(token);
+        {existingUser},process.env.jwt_secret) //payload,key
+      // console.log(token);
         response.status(200).json({existingUser,token})
     }else{
         response.status(406).json("invalid Email / password")
@@ -33,3 +35,4 @@ try{ const {email,password}=request.body
         response.status(401).json(err)
     }
 }
+
