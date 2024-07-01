@@ -105,10 +105,10 @@ exports.login = async (request, response) => {
   }
 };
 
-// email verification
+// email opt generation
 exports.sendOTPtoEmail = async (request, response) => {
   try {
-    const { client_email } = request.body[0];
+    const [{client_email }] = request.body;
     console.log(client_email);
     if (!client_email) {
       return response.status(400).json("Server error : no email");
@@ -137,23 +137,27 @@ exports.sendOTPtoEmail = async (request, response) => {
 };
 
 // verify email otp
-exports.verifyemail = async (request, response) => {
+exports.verifyemail = async (request,response) => {
   try {
-    const [{ client_email, otp }] = request.body;
-
-    const verifieduser = await otpusers.findOne({
-      client_email,
-      emailotp: otp,
+    const [{client_email,otp}]= request.body;
+      // console.log(request.body);
+      console.log(client_email);
+    let successuser = await otpusers.findOne({
+      email:client_email,
+      emailotp:otp
     });
-    console.log(verifieduser);
-    if (verifieduser) {
-      await otpusers.findOneAndDelete({ client_email, emailotp: otp });
+    console.log(successuser);
+    if (successuser) {
+      await otpusers.findOneAndDelete({client_email,emailotp:otp});
       return response.status(200).json({ message: "verified" });
     }
-    return response.status(400).json({ error: "email/opt is incorrect" });
+    console.log(successuser);
+    return response.status(400).send({status:400,message: "email/opt is incorrect" });
   } catch (error) {
+    console.log(error);
     return response
       .status(500)
-      .json({ error: "internal server error please try again" });
+      .send({ message: "internal server error please try again",error });
+      
   }
 };

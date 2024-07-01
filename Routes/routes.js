@@ -5,6 +5,7 @@ const router = express.Router(); // set path
 //set path for register
 router.post("/register", userController.register);
 // set path for login
+
 router.post("/login", userController.login);
 const passport = require("passport");
 // Google OAuth route
